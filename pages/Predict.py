@@ -17,88 +17,90 @@ with open('sales.pkl', 'rb') as f:
     stv = pickle.load(f)
     d_cols = [c for c in stv.columns if 'd_' in c]
 
-try:
-    from Home import store_list
-    store_list = st.selectbox('Chọn cửa hàng',store_list,default=store_list)
-    train_dataset = stv[d_cols[-100:-30]]
-    val_dataset = stv[d_cols[-30:]]
-except:
-    pass
+
+store_list = stv['store_id'].unique()
+chosen_store = st.selectbox('Chọn cửa hàng',store_list)
+stv=stv.query(f'store_id=="{chosen_store}"')
+st.write(stv)
+train_dataset = stv[d_cols[-100:-30]]
+val_dataset = stv[d_cols[-30:]]
 tab0, tab1, tab2, tab3 = st.tabs(["BaseLine", "Moving average", "SARIMAX", "So sánh"])
 with tab0:
-    predictions = []
-    for i in range(len(val_dataset.columns)):
-        if i == 0:
-            predictions.append(train_dataset[train_dataset.columns[-1]].values)
-        else:
-            predictions.append(val_dataset[val_dataset.columns[i - 1]].values)
+    try:
+        predictions = []
+        for i in range(len(val_dataset.columns)):
+            if i == 0:
+                predictions.append(train_dataset[train_dataset.columns[-1]].values)
+            else:
+                predictions.append(val_dataset[val_dataset.columns[i - 1]].values)
 
-    predictions = np.transpose(np.array([row.tolist() for row in predictions]))
-    error_naive = np.linalg.norm(predictions[:3] - val_dataset.values[:3]) / len(predictions[0])
+        predictions = np.transpose(np.array([row.tolist() for row in predictions]))
+        error_naive = np.linalg.norm(predictions[:3] - val_dataset.values[:3]) / len(predictions[0])
 
-    pred_1 = predictions[0]
-    pred_2 = predictions[1]
-    pred_3 = predictions[2]
+        pred_1 = predictions[0]
+        pred_2 = predictions[1]
+        pred_3 = predictions[2]
 
-    fig = make_subplots(rows=3, cols=1)
+        fig = make_subplots(rows=3, cols=1)
 
-    fig.add_trace(
-        go.Scatter(x=np.arange(70), mode='lines', y=train_dataset.loc[0].values, marker=dict(color="dodgerblue"),
-                   name="Train"),
-        row=1, col=1
-    )
+        fig.add_trace(
+            go.Scatter(x=np.arange(70), mode='lines', y=train_dataset.loc[0].values, marker=dict(color="dodgerblue"),
+                       name="Train"),
+            row=1, col=1
+        )
 
-    fig.add_trace(
-        go.Scatter(x=np.arange(70, 100), y=val_dataset.loc[0].values, mode='lines', marker=dict(color="darkorange"),
-                   name="Val"),
-        row=1, col=1
-    )
+        fig.add_trace(
+            go.Scatter(x=np.arange(70, 100), y=val_dataset.loc[0].values, mode='lines', marker=dict(color="darkorange"),
+                       name="Val"),
+            row=1, col=1
+        )
 
-    fig.add_trace(
-        go.Scatter(x=np.arange(70, 100), y=pred_1, mode='lines', marker=dict(color="seagreen"),
-                   name="Pred"),
-        row=1, col=1
-    )
+        fig.add_trace(
+            go.Scatter(x=np.arange(70, 100), y=pred_1, mode='lines', marker=dict(color="seagreen"),
+                       name="Pred"),
+            row=1, col=1
+        )
 
-    fig.add_trace(
-        go.Scatter(x=np.arange(70), mode='lines', y=train_dataset.loc[1].values, marker=dict(color="dodgerblue"),
-                   showlegend=False),
-        row=2, col=1
-    )
+        fig.add_trace(
+            go.Scatter(x=np.arange(70), mode='lines', y=train_dataset.loc[1].values, marker=dict(color="dodgerblue"),
+                       showlegend=False),
+            row=2, col=1
+        )
 
-    fig.add_trace(
-        go.Scatter(x=np.arange(70, 100), y=val_dataset.loc[1].values, mode='lines', marker=dict(color="darkorange"),
-                   showlegend=False),
-        row=2, col=1
-    )
+        fig.add_trace(
+            go.Scatter(x=np.arange(70, 100), y=val_dataset.loc[1].values, mode='lines', marker=dict(color="darkorange"),
+                       showlegend=False),
+            row=2, col=1
+        )
 
-    fig.add_trace(
-        go.Scatter(x=np.arange(70, 100), y=pred_2, mode='lines', marker=dict(color="seagreen"), showlegend=False,
-                   name="Denoised signal"),
-        row=2, col=1
-    )
+        fig.add_trace(
+            go.Scatter(x=np.arange(70, 100), y=pred_2, mode='lines', marker=dict(color="seagreen"), showlegend=False,
+                       name="Denoised signal"),
+            row=2, col=1
+        )
 
-    fig.add_trace(
-        go.Scatter(x=np.arange(70), mode='lines', y=train_dataset.loc[2].values, marker=dict(color="dodgerblue"),
-                   showlegend=False),
-        row=3, col=1
-    )
+        fig.add_trace(
+            go.Scatter(x=np.arange(70), mode='lines', y=train_dataset.loc[2].values, marker=dict(color="dodgerblue"),
+                       showlegend=False),
+            row=3, col=1
+        )
 
-    fig.add_trace(
-        go.Scatter(x=np.arange(70, 100), y=val_dataset.loc[2].values, mode='lines', marker=dict(color="darkorange"),
-                   showlegend=False),
-        row=3, col=1
-    )
+        fig.add_trace(
+            go.Scatter(x=np.arange(70, 100), y=val_dataset.loc[2].values, mode='lines', marker=dict(color="darkorange"),
+                       showlegend=False),
+            row=3, col=1
+        )
 
-    fig.add_trace(
-        go.Scatter(x=np.arange(70, 100), y=pred_3, mode='lines', marker=dict(color="seagreen"), showlegend=False,
-                   name="Denoised signal"),
-        row=3, col=1
-    )
+        fig.add_trace(
+            go.Scatter(x=np.arange(70, 100), y=pred_3, mode='lines', marker=dict(color="seagreen"), showlegend=False,
+                       name="Denoised signal"),
+            row=3, col=1
+        )
 
-    fig.update_layout(height=1200, width=800, title_text="Baseline")
-    st.plotly_chart(fig)
-
+        fig.update_layout(height=1200, width=800, title_text="Baseline")
+        st.plotly_chart(fig)
+    except:
+        pass
 with tab1:
     try:
         predictions = []
