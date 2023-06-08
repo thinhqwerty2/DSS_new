@@ -1,10 +1,14 @@
+import logging
 import pickle
 
 import numpy as np
+import pandas as pd
+import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 from plotly.subplots import make_subplots
 from pmdarima import auto_arima
+from sklearn.metrics import mean_absolute_error as mae
 
 st.title("Dự báo số lượng sản phẩm bán ra")
 st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -31,10 +35,8 @@ with tab0:
                 predictions.append(train_dataset[-1])
             else:
                 predictions.append(val_dataset[i - 1])
-        # predictions = np.transpose(np.array([row.tolist() for row in predictions]))
-        # error_naive = np.linalg.norm(predictions[:3] - val_dataset.values[:3]) / len(predictions)
         pred_1 = predictions
-
+        error_base = mae(val_dataset, pred_1)
         fig0 = make_subplots(rows=1, cols=1)
 
         fig0.add_trace(
@@ -70,12 +72,9 @@ with tab1:
             if i > 31:
                 predictions.append(np.mean([predictions[:i]]))
 
-        # predictions = np.transpose(np.array([row.tolist() for row in predictions]))
-        # error_avg = np.linalg.norm(predictions[:3] - val_dataset.values[:3]) / len(predictions[0])
-
-        fig1 = make_subplots(rows=1, cols=1)
-
         pred_1 = predictions
+        error_avg = mae(val_dataset, pred_1)
+        fig1 = make_subplots(rows=1, cols=1)
 
         fig1.add_trace(
             go.Scatter(x=np.arange(70), mode='lines', y=train_dataset, marker=dict(color="dodgerblue"),
@@ -104,15 +103,16 @@ with tab1:
 with tab2:
     try:
         import statsmodels.api as sm
-        model = auto_arima(train_dataset,seasonal=True,m=7,start_p=0,start_q=0)
-        predictions=[]
+
+        model = auto_arima(train_dataset, seasonal=True, m=7, start_p=0, start_q=0)
+        predictions = []
         # fit = sm.tsa.statespace.SARIMAX(train_dataset, seasonal_order=(0, 1, 1, 7)).fit()
         # predictions.append(fit.forecast(30))
         # predictions = np.array(predictions).T
         predictions = model.predict(30)
         st.write(model)
         pred_1 = predictions
-
+        error_sarimax = mae(val_dataset, pred_1)
         fig2 = make_subplots(rows=1, cols=1)
         fig2.add_trace(
             go.Scatter(x=np.arange(71), mode='lines', y=train_dataset, marker=dict(color="dodgerblue"),
@@ -138,8 +138,18 @@ with tab2:
         pass
 with tab3:
     try:
-        st.plotly_chart(fig0)
-        st.plotly_chart(fig1)
-        st.plotly_chart(fig2)
-    except:
+        fig3 = make_subplots(rows=3, cols=1)
+        fig3.add_trace(fig0)
+        fig3.add_trace(fig1)
+        fig3.add_trace(fig2)
+        fig3.update_layout(height=1200, width=800)
+        st.plotly_chart(fig3)
+        error = [error_base, error_avg, error_sarimax]
+        names = ["Baseline", "Moving average", "SARIMAX"]
+        df = pd.DataFrame(np.transpose([error, names]))
+        df.columns = ["RMSE Loss", "Model"]
+        fig3=px.bar(df, y="MAE", x="Mô hình", title="MAE của các mô hình")
+        st.plotly_chart(fig3)
+    except Exception as e:
+        logging.info(e)
         pass
