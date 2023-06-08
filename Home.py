@@ -22,14 +22,16 @@ stv = None
 sellp = None
 cal = None
 with tab1:
-    st.subheader("Tải lên dữ liệu bán hàng")
-    sales = st.file_uploader("Choose a CSV file", key='sales')
-
-    st.subheader("Tải lên dữ liệu về giá")
-    sell_prices = st.file_uploader("Choose a CSV file", key='sell_prices')
-
-    st.subheader("Tải lên dữ liệu về ngày tháng")
-    calendar = st.file_uploader("Choose a CSV file", key='calendar')
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.write("Tải lên dữ liệu bán hàng")
+        sales = st.file_uploader("Choose a CSV file", key='sales')
+    with col2:
+        st.write("Tải lên dữ liệu về giá")
+        sell_prices = st.file_uploader("Choose a CSV file", key='sell_prices')
+    with col3:
+        st.write("Tải lên dữ liệu về ngày tháng")
+        calendar = st.file_uploader("Choose a CSV file", key='calendar')
 
     if sales is not None:
         stv = pd.read_csv(sales)

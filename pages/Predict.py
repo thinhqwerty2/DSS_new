@@ -22,11 +22,11 @@ with open('sales.pkl', 'rb') as f:
 store_list = stv['store_id'].unique()
 chosen_store = st.selectbox('Chọn cửa hàng', store_list)
 stv = stv.query(f'store_id=="{chosen_store}"')
-chosen_product = st.selectbox('Chọn sản phẩm', stv['item_id'])
+chosen_product = st.selectbox('Chọn sản phẩm', stv['item_id'],index=2314)
 dataset = stv.query(f'item_id=="{chosen_product}"')
 train_dataset = dataset[d_cols[-300:-30]].squeeze()
 val_dataset = dataset[d_cols[-30:]].squeeze()
-tab0, tab1, tab2, tab3 = st.tabs(["Baseline", "Moving average", "SARIMAX", "So sánh"])
+tab0, tab1, tab2, tab3 = st.tabs(["Baseline", "Moving average", "ARIMA", "So sánh"])
 with tab0:
     try:
         predictions = []
@@ -104,11 +104,8 @@ with tab2:
     try:
         import statsmodels.api as sm
 
-        model = auto_arima(train_dataset, seasonal=True, m=7, start_p=0, start_q=0)
+        model = auto_arima(train_dataset, seasonal=False)
         predictions = []
-        # fit = sm.tsa.statespace.SARIMAX(train_dataset, seasonal_order=(0, 1, 1, 7)).fit()
-        # predictions.append(fit.forecast(30))
-        # predictions = np.array(predictions).T
         predictions = model.predict(30)
         st.write(model)
         pred_1 = predictions
@@ -143,11 +140,14 @@ with tab3:
         st.plotly_chart(fig1)
         st.plotly_chart(fig2)
         error = [error_base, error_avg, error_sarimax]
-        names = ["Baseline", "Moving average", "SARIMAX"]
+        names = ["Baseline", "Moving average", "ARIMA"]
         df = pd.DataFrame(np.transpose([error, names]))
         df.columns = ["MAE", "Mô hình"]
         fig3 = px.bar(df, y="MAE", x="Mô hình",color="Mô hình", title="MAE của các mô hình")
         st.plotly_chart(fig3)
+
+
+
     except Exception as e:
-        logging.info(e)
+        st.write(e)
         pass
