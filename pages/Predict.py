@@ -102,15 +102,15 @@ with tab1:
         pass
 
 with tab2:
+    try:
         import statsmodels.api as sm
-        model = auto_arima(train_dataset,seasonal=True,m=12)
+        model = auto_arima(train_dataset,seasonal=True,m=7,start_p=0,start_q=0)
         predictions=[]
         # fit = sm.tsa.statespace.SARIMAX(train_dataset, seasonal_order=(0, 1, 1, 7)).fit()
         # predictions.append(fit.forecast(30))
         # predictions = np.array(predictions).T
-        st.write(model)
         predictions = model.predict(30)
-        st.write(predictions)
+        st.write(model)
         pred_1 = predictions
 
         fig2 = make_subplots(rows=1, cols=1)
@@ -134,3 +134,12 @@ with tab2:
         fig2.update_layout(height=400, width=800)
         st.plotly_chart(fig2)
 
+    except:
+        pass
+with tab3:
+    try:
+        st.plotly_chart(fig0)
+        st.plotly_chart(fig1)
+        st.plotly_chart(fig2)
+    except:
+        pass
