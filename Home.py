@@ -90,17 +90,17 @@ with tab2:
             with tab23:
                 st.subheader('Dữ liệu chuỗi thời gian của một mặt hàng')
                 product_id = st.selectbox('Chọn sản phẩm', stv['id'], 8412)
-                query_day=st.slider(
+                query_day23=st.slider(
                     "Chọn khoảng thời gian",
-                    min_value=datetime(2011,1,1),
-                    max_value=datetime(2017,12,12),
-                    value=(datetime(2012, 1,1), datetime(2016,12,12)),format="MM/YY")
+                    min_value=datetime(2011,1,29),
+                    max_value=datetime(2016,6,19),
+                    value=(datetime(2011,1,29), datetime(2016,6,19)),format="MM/YY",key=23)
                 example = stv.loc[stv['id'] == product_id][d_cols].T
                 example = example.rename(columns={example.columns[0]: product_id})  # Name it correctly
                 example = example.reset_index().rename(columns={'index': 'd'})  # make the index "d"
                 example = example.merge(cal, how='left', validate='1:1')
                 example['date']=pd.to_datetime(example['date'])
-                example=example.set_index('date').loc[query_day[0]:query_day[1]]
+                example=example.set_index('date').loc[query_day23[0]:query_day23[1]]
                 example[product_id] \
                     .plot(figsize=(15, 5),
                           color=next(color_cycle),
@@ -146,12 +146,15 @@ with tab2:
                            style='.',
                            color=next(color_cycle),
                            figsize=(15, 5),
-                           title='Giá của FOODS_3_090 theo từng cửa hàng',
+                           title=f'Giá của {product_id[:-16]} theo từng cửa hàng',
                            ax=ax,
+
                            legend=store)
                     stores.append(store)
                     plt.legend()
                 plt.legend(stores)
+                ax.set_xlabel('Id của tuần')
+                ax.set_ylabel('Giá bán')
                 st.pyplot()
 
             # st.subheader('20 mặt hàng khác')
@@ -185,20 +188,11 @@ with tab2:
             # st.pyplot()
             with tab21:
 
-                # sellp['Category'] = sellp['item_id'].str.split('_', expand=True)[0]
-                # fig, axs = plt.subplots(1, 3, figsize=(15, 4))
-                # i = 0
-                # for cat, d in sellp.groupby('Category'):
-                #     ax = d['sell_price'].apply(np.log1p) \
-                #         .plot(kind='hist',
-                #               bins=20,
-                #               title=f'Distribution of {cat} prices',
-                #               ax=axs[i],
-                #               color=next(color_cycle))
-                #     ax.set_xlabel('Log(price)')
-                #     i += 1
-                # plt.tight_layout()
-                # st.pyplot()
+                query_day21 = st.slider(
+                    "Chọn khoảng thời gian",
+                    min_value=datetime(2011, 1, 29),
+                    max_value=datetime(2016, 6, 19),
+                    value=(datetime(2011, 1, 29), datetime(2016, 6, 19)), format="MM/YY",key=21)
 
                 st.subheader('Tổng số lượng sản phẩm bán được theo phân loại sản phẩm')
                 fig, ax = plt.subplots(1, 1)
@@ -209,10 +203,10 @@ with tab2:
                            right_index=True,
                            validate='1:1') \
                     .set_index('date')
-
+                past_sales.index=pd.to_datetime(past_sales.index)
                 for i in stv['cat_id'].unique():
                     items_col = [c for c in past_sales.columns if i in c]
-                    past_sales[items_col] \
+                    past_sales[items_col].loc[query_day21[0]:query_day21[1]] \
                         .sum(axis=1) \
                         .plot(figsize=(15, 5),
                               alpha=0.8)
@@ -225,7 +219,7 @@ with tab2:
                 fig, ax = plt.subplots(1, 1)
                 for i in stv['cat_id'].unique():
                     items_col = [c for c in past_sales.columns if i in c]
-                    (past_sales_clipped[items_col] \
+                    (past_sales_clipped[items_col].loc[query_day21[0]:query_day21[1]] \
                      .mean(axis=1) * 100) \
                         .plot(figsize=(15, 5),
                               alpha=0.8,
@@ -315,6 +309,11 @@ with tab2:
 
 
             with tab22:
+                query_day22 = st.slider(
+                    "Chọn khoảng thời gian",
+                    min_value=datetime(2011, 1, 29),
+                    max_value=datetime(2016, 6, 19),
+                    value=(datetime(2011, 1, 29), datetime(2016, 6, 19)), format="MM/YY",key=22)
                 store_list = sellp['store_id'].unique()
                 store_list = st.multiselect('Chọn cửa hàng',store_list,default=store_list)
                 st.subheader(f'Trung bình số lượng sản phẩm bán trong')
@@ -334,7 +333,7 @@ with tab2:
 
                 st.subheader(f'Trung bình số lượng sản phẩm bán trong')
                 sum_day2 = st.slider('Chọn số ngày', min_value=1, max_value=365, value=7, step=1,key='sum_day2')
-                fig, axes = plt.subplots(5, 2, figsize=(15, 10), sharex=True)
+                fig, axes = plt.subplots(int(np.ceil(len(store_list)/2)), 2, figsize=(15, 10), sharex=True)
                 axes = axes.flatten()
                 ax_idx = 0
                 for s in store_list:
@@ -349,7 +348,7 @@ with tab2:
                               color=next(color_cycle))
                     ax_idx += 1
                 # plt.legend(store_list)
-                plt.suptitle(f'{sum_day2} day\'s Sale Trends by Store')
+                plt.suptitle(f'Trung bình số lượng sản phẩm bán trong {sum_day2} ngày theo cửa hàng')
                 plt.tight_layout()
                 st.pyplot()
 
