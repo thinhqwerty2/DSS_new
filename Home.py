@@ -8,7 +8,7 @@ import pandas as pd
 import streamlit as st
 from dateutil.relativedelta import relativedelta
 from matplotlib.patches import Polygon
-
+st.header("Chào mừng bạn đến với hệ hỗ trợ quyết định")
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 pd.set_option('display.max_columns', 50)
@@ -16,8 +16,7 @@ plt.style.use('bmh')
 color_pal = plt.rcParams['axes.prop_cycle'].by_key()['color']
 color_cycle = cycle(plt.rcParams['axes.prop_cycle'].by_key()['color'])
 
-st.markdown("# Dữ liệu 🎉")
-st.sidebar.markdown("# Dữ liệu 🎉")
+st.markdown("# Dữ liệu")
 tab1, tab2 = st.tabs(["Upload dữ liệu", "Thông tin dữ liệu"])
 stv = None
 sellp = None
