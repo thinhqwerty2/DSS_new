@@ -138,17 +138,15 @@ with tab2:
         pass
 with tab3:
     try:
-        fig3 = make_subplots(rows=3, cols=1)
-        fig3.add_trace(fig0)
-        fig3.add_trace(fig1)
-        fig3.add_trace(fig2)
-        fig3.update_layout(height=1200, width=800)
-        st.plotly_chart(fig3)
+
+        st.plotly_chart(fig0)
+        st.plotly_chart(fig1)
+        st.plotly_chart(fig2)
         error = [error_base, error_avg, error_sarimax]
         names = ["Baseline", "Moving average", "SARIMAX"]
         df = pd.DataFrame(np.transpose([error, names]))
-        df.columns = ["RMSE Loss", "Model"]
-        fig3=px.bar(df, y="MAE", x="Mô hình", title="MAE của các mô hình")
+        df.columns = ["MAE", "Mô hình"]
+        fig3 = px.bar(df, y="MAE", x="Mô hình",color="Mô hình", title="MAE của các mô hình")
         st.plotly_chart(fig3)
     except Exception as e:
         logging.info(e)
