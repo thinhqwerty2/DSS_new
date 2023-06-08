@@ -23,38 +23,31 @@ chosen_store = st.selectbox('Chọn cửa hàng',store_list)
 stv=stv.query(f'store_id=="{chosen_store}"')
 chosen_product = st.selectbox('Chọn sản phẩm',stv['item_id'])
 dataset=stv.query(f'item_id=="{chosen_product}"')
-train_dataset = dataset[d_cols[-100:-30]]
-val_dataset = dataset[d_cols[-30:]]
-st.write(train_dataset,type(val_dataset))
+train_dataset = dataset[d_cols[-100:-30]].squeeze()
+val_dataset = dataset[d_cols[-30:]].squeeze()
 tab0, tab1, tab2, tab3 = st.tabs(["BaseLine", "Moving average", "SARIMAX", "So sánh"])
 with tab0:
     try:
         predictions = []
         for i in range(len(val_dataset)):
-            st.write(i)
             if i == 0:
-                predictions.append(train_dataset[train_dataset.columns[-1]].values)
+                predictions.append(train_dataset[-1])
             else:
-                predictions.append(val_dataset[val_dataset.columns[i - 1]].values)
+                predictions.append(val_dataset[i - 1])
+        # predictions = np.transpose(np.array([row.tolist() for row in predictions]))
+        # error_naive = np.linalg.norm(predictions[:3] - val_dataset.values[:3]) / len(predictions)
+        pred_1 = predictions
 
-            st.write(predictions)
-        predictions = np.transpose(np.array([row.tolist() for row in predictions]))
-        error_naive = np.linalg.norm(predictions[:3] - val_dataset.values[:3]) / len(predictions[0])
-
-        pred_1 = predictions[0]
-        pred_2 = predictions[1]
-        pred_3 = predictions[2]
-
-        fig = make_subplots(rows=3, cols=1)
+        fig = make_subplots(rows=1, cols=1)
 
         fig.add_trace(
-            go.Scatter(x=np.arange(70), mode='lines', y=train_dataset.loc[0].values, marker=dict(color="dodgerblue"),
+            go.Scatter(x=np.arange(70), mode='lines', y=train_dataset, marker=dict(color="dodgerblue"),
                        name="Train"),
             row=1, col=1
         )
 
         fig.add_trace(
-            go.Scatter(x=np.arange(70, 100), y=val_dataset.loc[0].values, mode='lines', marker=dict(color="darkorange"),
+            go.Scatter(x=np.arange(70, 100), y=val_dataset, mode='lines', marker=dict(color="darkorange"),
                        name="Val"),
             row=1, col=1
         )
@@ -65,43 +58,8 @@ with tab0:
             row=1, col=1
         )
 
-        fig.add_trace(
-            go.Scatter(x=np.arange(70), mode='lines', y=train_dataset.loc[1].values, marker=dict(color="dodgerblue"),
-                       showlegend=False),
-            row=2, col=1
-        )
 
-        fig.add_trace(
-            go.Scatter(x=np.arange(70, 100), y=val_dataset.loc[1].values, mode='lines', marker=dict(color="darkorange"),
-                       showlegend=False),
-            row=2, col=1
-        )
-
-        fig.add_trace(
-            go.Scatter(x=np.arange(70, 100), y=pred_2, mode='lines', marker=dict(color="seagreen"), showlegend=False,
-                       name="Denoised signal"),
-            row=2, col=1
-        )
-
-        fig.add_trace(
-            go.Scatter(x=np.arange(70), mode='lines', y=train_dataset.loc[2].values, marker=dict(color="dodgerblue"),
-                       showlegend=False),
-            row=3, col=1
-        )
-
-        fig.add_trace(
-            go.Scatter(x=np.arange(70, 100), y=val_dataset.loc[2].values, mode='lines', marker=dict(color="darkorange"),
-                       showlegend=False),
-            row=3, col=1
-        )
-
-        fig.add_trace(
-            go.Scatter(x=np.arange(70, 100), y=pred_3, mode='lines', marker=dict(color="seagreen"), showlegend=False,
-                       name="Denoised signal"),
-            row=3, col=1
-        )
-
-        fig.update_layout(height=1200, width=800, title_text="Baseline")
+        fig.update_layout(height=400, width=800, title_text="Baseline")
         st.plotly_chart(fig)
     except:
         pass
