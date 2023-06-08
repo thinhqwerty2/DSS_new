@@ -9,6 +9,7 @@ import streamlit as st
 from plotly.subplots import make_subplots
 from pmdarima import auto_arima
 from sklearn.metrics import mean_absolute_error as mae
+from sklearn.metrics import mean_absolute_percentage_error as mpae
 
 st.title("Dự báo số lượng sản phẩm bán ra")
 st.set_option('deprecation.showPyplotGlobalUse', False)
@@ -37,6 +38,8 @@ with tab0:
                 predictions.append(val_dataset[i - 1])
         pred_1 = predictions
         error_base = mae(val_dataset, pred_1)
+        mpae_base = mpae(val_dataset,pred_1)
+
         fig0 = make_subplots(rows=1, cols=1)
 
         fig0.add_trace(
@@ -74,6 +77,7 @@ with tab1:
 
         pred_1 = predictions
         error_avg = mae(val_dataset, pred_1)
+        mpae_avg = mpae(val_dataset,pred_1)
         fig1 = make_subplots(rows=1, cols=1)
 
         fig1.add_trace(
@@ -109,7 +113,9 @@ with tab2:
         predictions = model.predict(30)
         st.write(model)
         pred_1 = predictions
-        error_sarimax = mae(val_dataset, pred_1)
+        error_arima = mae(val_dataset, pred_1)
+        mpae_arima = mpae(val_dataset,pred_1)
+
         fig2 = make_subplots(rows=1, cols=1)
         fig2.add_trace(
             go.Scatter(x=np.arange(71), mode='lines', y=train_dataset, marker=dict(color="dodgerblue"),
@@ -139,13 +145,16 @@ with tab3:
         st.plotly_chart(fig0)
         st.plotly_chart(fig1)
         st.plotly_chart(fig2)
-        error = [error_base, error_avg, error_sarimax]
+        # error = [error_base, error_avg, error_arima]
+        error = [mpae_base,mpae_avg,mpae_arima]
         names = ["Baseline", "Moving average", "ARIMA"]
         df = pd.DataFrame(np.transpose([error, names]))
-        df.columns = ["MAE", "Mô hình"]
-        fig3 = px.bar(df, y="MAE", x="Mô hình",color="Mô hình", title="MAE của các mô hình")
+        df.columns = ["MPAE", "Mô hình"]
+        fig3 = px.bar(df, y="MPAE", x="Mô hình",color="Mô hình", title="MPAE của các mô hình")
         st.plotly_chart(fig3)
 
+        # mpae_=[mpae_base,mpae_avg,mpae_arima]
+        # st.write(error)
 
 
     except Exception as e:
