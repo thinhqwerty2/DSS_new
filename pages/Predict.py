@@ -21,19 +21,23 @@ with open('sales.pkl', 'rb') as f:
 store_list = stv['store_id'].unique()
 chosen_store = st.selectbox('Chọn cửa hàng',store_list)
 stv=stv.query(f'store_id=="{chosen_store}"')
-st.write(stv)
-train_dataset = stv[d_cols[-100:-30]]
-val_dataset = stv[d_cols[-30:]]
+chosen_product = st.selectbox('Chọn sản phẩm',stv['item_id'])
+dataset=stv.query(f'item_id=="{chosen_product}"')
+train_dataset = dataset[d_cols[-100:-30]]
+val_dataset = dataset[d_cols[-30:]]
+st.write(train_dataset,type(val_dataset))
 tab0, tab1, tab2, tab3 = st.tabs(["BaseLine", "Moving average", "SARIMAX", "So sánh"])
 with tab0:
     try:
         predictions = []
-        for i in range(len(val_dataset.columns)):
+        for i in range(len(val_dataset)):
+            st.write(i)
             if i == 0:
                 predictions.append(train_dataset[train_dataset.columns[-1]].values)
             else:
                 predictions.append(val_dataset[val_dataset.columns[i - 1]].values)
 
+            st.write(predictions)
         predictions = np.transpose(np.array([row.tolist() for row in predictions]))
         error_naive = np.linalg.norm(predictions[:3] - val_dataset.values[:3]) / len(predictions[0])
 
