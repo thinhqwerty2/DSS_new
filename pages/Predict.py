@@ -197,7 +197,7 @@ with tab2:
         s_param = 7
         p_col, d_col, q_col, s_col = st.columns(4)
         with s_col:
-            seasonal = st.checkbox('Tính mùa', value=False)
+            seasonal = st.checkbox('Sử dụng SARIMA', value=False)
             if seasonal:
                 s_param = int(st.text_input("Tham số s", value='7', key='S_param'))
         with p_col:
@@ -223,11 +223,11 @@ with tab2:
         try:
             if seasonal:
                 with col2:
-                    st.text("***")
+                    st.write(f'D = {rs[1]}')
                     st.pyplot(plot_pacf(new_train_dataset, alpha=0.05, lags=lag, title=f'Diff({s_param}) pacf'))
 
                 with col1:
-                    st.write(f"Số lần sai phân lag = {s_param}: D = {rs[1]}", )
+                    st.write(f"Số lần sai phân với chu kỳ {s_param} là ", )
                     # lag2 = st.slider(
                     #     "Chọn khoảng thời gian", min_value=1, max_value=100, value=50,key='lag2')
                     st.pyplot(plot_acf(new_train_dataset, alpha=0.05, lags=lag, title=f'Diff({s_param}) acf'))
@@ -286,7 +286,16 @@ with tab2:
             )
             fig2.update_layout(height=400, width=800)
             st.plotly_chart(fig2)
-        except:
+
+
+            dl_data=pd.Series(pred_1)
+            dl_data.name = chosen_product
+
+            data = dl_data.to_csv(index=False).encode()
+            st.download_button(label="Tải xuống file dự báo", data=data, file_name='predict_30day.csv',
+                               mime='text/csv', )
+        except Exception as e:
+            st.write(e)
             pass
 
 with tab3:
