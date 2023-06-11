@@ -25,9 +25,9 @@ chosen_store = st.selectbox('Chọn cửa hàng', store_list,index=2)
 stv = stv.query(f'store_id=="{chosen_store}"')
 chosen_product = st.selectbox('Chọn sản phẩm', stv['item_id'], index=2314)
 dataset = stv.query(f'item_id=="{chosen_product}"')
-train_dataset = dataset[d_cols[-365:-30]].squeeze()
+train_dataset = dataset[d_cols[-365*2:-30]].squeeze()
 val_dataset = dataset[d_cols[-30:]].squeeze()
-tab0, tab1, tab2, tab3 = st.tabs(["Baseline", "Moving average", "ARIMA", "So sánh"])
+tab0, tab1, tab2, tab3 = st.tabs(["Baseline", "Moving average", "ARIMA", "Đánh giá"])
 with tab0:
     try:
         predictions = []
