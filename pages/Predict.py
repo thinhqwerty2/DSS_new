@@ -257,7 +257,7 @@ with tab2:
         mape_arima = mape(val_dataset, pred_1)
         mape_arima1 = mape(val_dataset, pred_2)
     except Exception as e:
-        # st.write(e)
+        st.write(f'p và q phải nhỏ hơn s = {s_param}')
         pass
     finally:
         try:
@@ -289,13 +289,13 @@ with tab2:
 
 
             dl_data=pd.Series(pred_1)
-            dl_data.name = chosen_product
+            dl_data.name = f'{chosen_product}_{chosen_store}'
 
             data = dl_data.to_csv(index=False).encode()
             st.download_button(label="Tải xuống file dự báo", data=data, file_name='predict_30day.csv',
                                mime='text/csv', )
         except Exception as e:
-            st.write(e)
+            # st.write(e)
             pass
 
 with tab3:
